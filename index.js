@@ -28,12 +28,24 @@ app.post("/add", (req, res) => {
     let newFood = req.body.newFood;
     let newPrice = Number(req.body.newPrice);
     let newQuantity = Number(req.body.newQuantity);
- 
     foodDisplayArr.push(newFood);
     res.redirect('/');
-  
 });
 
+app.get("/order", (req, res) => {
+    res.send("<form action='/order' method='post'><input type='text' name='food' placeholder='Food'><input type='number' name='quantity' placeholder='Number of plates'><button type='submit'>Order</button></form>")
+});
+
+app.post("/order", (req, res) => {
+    let orderedFood = req.body.food;
+    let orderedQuantity = Number(req.body.quantity);
+    let order = {
+        food: orderedFood,
+        quantity: orderedQuantity
+    }
+    console.log(order);
+    res.redirect("/order");
+});
 
 app.listen(port,()=>{
     console.log(`Server is live at port ${port}`);
