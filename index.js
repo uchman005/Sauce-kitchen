@@ -1,22 +1,34 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 // the middle ware I'm most comfortable with
 const port = 3000;
-
 const app = express();
+var newFood = String();
+var newQuantity = Number();
+var newPrice = Number();
+var menu;
+
+mongoose.connect("mongodb://localhost:27017/foodDB", {useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.urlencoded({extended: true}));
 
-let foodDisplayArr = ["Rice", "Beans", "Akpu", "Okpa"];
-// this is the array from which Sauce displays available food
-app.get("/", (req, res) => {
-foodDisplayArr.forEach((food)=>{
-    console.log(food);
-//A simple loop that goes over the display array and logs available food
+
+const foodSchema = new mongoose.Schema({
+    name: String,
+    quantity: Number,
+    price: Number
 });
-    
 
-res.end();
+const Food = mongoose.model("food", foodSchema);
 
+app.get("/", (req, res) => {
+    Food.find((err, foods)=> {
+        if(!err){ foods.forEach((food)=>{
+          console.log(food.name);
+          });}
+      });
+//A simple loop that goes over the collection and logs available food
+    res.end();
 });
 
 app.get("/add", (req, res) => {
@@ -25,10 +37,16 @@ app.get("/add", (req, res) => {
  });
 
 app.post("/add", (req, res) => {
-    let newFood = req.body.newFood;
-    let newPrice = Number(req.body.newPrice);
-    let newQuantity = Number(req.body.newQuantity);
-    foodDisplayArr.push(newFood);
+     newFood = req.body.newFood;
+     newPrice = req.body.newPrice;
+     newQuantity = req.body.newQuantity;
+    
+     menu = new Food({
+        name: newFood,
+        quantity: newQuantity,
+        price: newPrice,
+    });
+    menu.save();
     res.redirect('/');
 });
 
@@ -37,7 +55,7 @@ app.get("/order", (req, res) => {
 });
 
 app.post("/order", (req, res) => {
-    let orderedFood = req.body.food;
+    let orderedFood = String(req.body.food);
     let orderedQuantity = Number(req.body.quantity);
     let order = {
         food: orderedFood,
