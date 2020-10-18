@@ -4,10 +4,10 @@ const mongoose = require("mongoose");
 // the middle ware I'm most comfortable with
 const port = 3000;
 const app = express();
-var newFood = String();
-var newQuantity = Number();
-var newPrice = Number();
-var menu;
+let newFood = String();
+let newQuantity = Number();
+let newPrice = Number();
+let menu;
 
 mongoose.connect("mongodb://localhost:27017/foodDB", {useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.urlencoded({extended: true}));
@@ -24,11 +24,11 @@ const Food = mongoose.model("food", foodSchema);
 app.get("/", (req, res) => {
     Food.find((err, foods)=> {
         if(!err){ foods.forEach((food)=>{
-          console.log(food.name);
+         if(food.quantity > 0) console.log(food.name);
           });}
       });
 //A simple loop that goes over the collection and logs available food
-    res.end();
+    res.send("<h2> As a customer proceed to the order route to purchase</h2><h3>As the chef proceed to the add route to add");
 });
 
 app.get("/add", (req, res) => {
@@ -58,13 +58,19 @@ app.post("/order", (req, res) => {
     let orderedFood = String(req.body.food);
     let orderedQuantity = Number(req.body.quantity);
     let order = {
-        food: orderedFood,
+        name: orderedFood,
         quantity: orderedQuantity
     }
+
+
+    Food.findOneAndUpdate({name: orderedFood},{quantity: {$set: -orderedQuantity}},(err)=>{
+if(!err){console.log("Successfully updated item");}
+    });
+    
     console.log(order);
     res.redirect("/order");
 });
 
-app.listen(port,()=>{
+app.listen(port,() => {
     console.log(`Server is live at port ${port}`);
 });
