@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const ejs = require("ejs");
 // the middle ware I'm most comfortable with
 const port = 3000;
 const app = express();
@@ -11,7 +12,8 @@ let menu;
 
 mongoose.connect("mongodb://localhost:27017/foodDB", {useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.set("view engine", "ejs");
+app.use(express.static(__dirname + "/public"));
 
 const foodSchema = new mongoose.Schema({
     name: String,
@@ -63,11 +65,13 @@ app.post("/order", (req, res) => {
     }
 
 
-    Food.findOneAndUpdate({name: orderedFood},{quantity: {$set: -orderedQuantity}},(err)=>{
-if(!err){console.log("Successfully updated item");}
+    Food.find((err, foods)=> {
+        if(!err) foods.forEach((food)=>{
+        if(order.name.toLowerCase() == food.name.toLowerCase()){
+            console.log(order);
+        }
+        })
     });
-    
-    console.log(order);
     res.redirect("/order");
 });
 
